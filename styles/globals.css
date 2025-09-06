@@ -1,0 +1,249 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f0f0f0 !important;
+  --foreground: #171717 !important;
+  --primary: rgb(0, 0, 0, 0.8) !important;
+  --secondary: rgb(0, 0, 0, 0.2) !important;
+}
+
+.dark {
+  --background: #0a0a0a !important;
+  --foreground: #ededed !important;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+.container {
+  /* margin: 0 auto; */
+  padding: 1rem 0;
+  width: 100% !important;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 600px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 728px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 984px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1240px !important;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1440px !important;
+  }
+}
+
+@font-face {
+  font-family: "Open Sauce Sans";
+  src: url("/fonts/OpenSauceSans/OpenSauceSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  scroll-behavior: smooth;
+  transition: all 0.5s ease-in-out;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Open Sauce Sans", sans-serif;
+}
+.font-sauce {
+  font-family: "Open Sauce Sans", sans-serif !important;
+}
+
+.bg-primary {
+  background-color: var(--primary);
+  background-color: transparent;
+}
+
+.card {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 2px 4px 0 rgba(123, 123, 123, 0.2);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 2rem;
+  height: 320px;
+  height: 38.5vh !important;
+  border-radius: 1.6rem;
+  cursor: pointer;
+  z-index: 9999;
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 2px 20px 0 rgba(123, 123, 123, 1);
+    transition: 500ms all;
+  }
+  transition: 500ms all;
+  overflow: hidden;
+}
+
+.glass-button {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 2px 4px 0 rgba(123, 123, 123, 0.8);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.6rem;
+  cursor: pointer;
+  z-index: 9999;
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 2px 20px 0 rgba(123, 123, 123, 1);
+    transition: 500ms all;
+  }
+  transition: 500ms all;
+  overflow: hidden;
+}
+
+.glass {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 2px 4px 0 rgba(123, 123, 123, 0.8);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.6rem;
+}
+
+@media (max-width: 1024px) {
+  .card {
+    height: 220px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .card {
+    height: 160px !important;
+    padding: 1.5rem;
+  }
+  .mini {
+    height: 150px !important;
+  }
+}
+
+@media (min-height: 850px) {
+  .card {
+    height: 200px;
+  }
+}
+
+.word-slider {
+  position: relative;
+  width: 200px;
+  height: 100px;
+  overflow: hidden;
+}
+
+.word {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  font-size: 80px;
+  font-weight: bold;
+  color: black;
+  line-height: 1;
+  text-align: left;
+}
+
+/* Word going up-left */
+.word.out {
+  top: 0;
+  animation: slide-up 1.2s ease-in-out forwards;
+}
+
+/* Word coming in from bottom-right */
+.word.in {
+  top: 100%;
+  animation: slide-in 1.2s ease-in-out forwards;
+  animation-delay: 0.1s;
+}
+
+/* Keyframes */
+@keyframes slide-up {
+  0% {
+    transform: translateY(0%) translateX(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%) translateX(-30px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in {
+  0% {
+    transform: translateY(100%) translateX(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0%) translateX(0px);
+    opacity: 1;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-inner {
+  display: inline-block;
+  animation: marquee 15s linear infinite;
+  @media (max-width: 768px) {
+    animation: marquee 5s linear infinite;
+  }
+  width: 200%;
+}
+
+.marquee-content {
+  display: inline-block;
+  width: 100%;
+}
