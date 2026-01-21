@@ -41,11 +41,40 @@ export interface QRType {
 export interface QRField {
   name: string
   label: string
-  type: "text" | "url" | "email" | "tel" | "textarea" | "select" | "datetime-local" | "file"
+  type: "text" | "url" | "email" | "tel" | "textarea" | "select" | "datetime-local" | "file" | "location"
   placeholder?: string
   required?: boolean
   options?: { value: string; label: string }[]
   accept?: string
+}
+
+export interface MultiLinkItem {
+  id: string
+  typeId: string
+  typeName: string
+  typeIcon: string
+  title: string
+  url: string
+}
+
+export function generateMultiLinkQR(
+  title: string, 
+  description: string, 
+  links: MultiLinkItem[]
+): string {
+  if (!title || links.length === 0) return ""
+  
+  const data = {
+    title,
+    description,
+    links: links.map(l => ({ 
+      title: l.title, 
+      url: l.url,
+      type: l.typeId 
+    })),
+  }
+  const encoded = btoa(encodeURIComponent(JSON.stringify(data)))
+  return `${typeof window !== 'undefined' ? window.location.origin : ''}/links/${encoded}`
 }
 
 export const QR_TYPES: QRType[] = [
@@ -60,6 +89,7 @@ export const QR_TYPES: QRType[] = [
       { name: "url", label: "Website URL", type: "url", placeholder: "https://example.com", required: true },
     ],
   },
+  
   {
     id: "wifi",
     name: "WiFi Network",
@@ -122,9 +152,7 @@ export const QR_TYPES: QRType[] = [
     icon: MapPin,
     category: "utility",
     fields: [
-      { name: "latitude", label: "Latitude", type: "text", placeholder: "40.7128", required: true },
-      { name: "longitude", label: "Longitude", type: "text", placeholder: "-74.0060", required: true },
-      { name: "name", label: "Location Name", type: "text", placeholder: "New York City" },
+      { name: "location", label: "Pick Location", type: "location", placeholder: "Select from map", required: true },
     ],
   },
   {

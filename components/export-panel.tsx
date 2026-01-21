@@ -35,6 +35,87 @@ export function ExportPanel({ data, style }: ExportPanelProps) {
   const [copiedLink, setCopiedLink] = useState(false)
   const [downloading, setDownloading] = useState<ExportFormat | null>(null)
 
+  const generateCanvasWithLogo = async (canvas: HTMLCanvasElement, multiplier = 1) => {
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    await QRCode.toCanvas(canvas, data, {
+      width: style.size * multiplier,
+      margin: style.margin,
+      color: {
+        dark: style.fgColor,
+        light: style.bgColor,
+      },
+      errorCorrectionLevel: style.errorCorrection,
+    })
+
+    // Apply dot style if not square
+    if (style.dotStyle && style.dotStyle !== "square") {
+      const qrData = await QRCode.create(data, {
+        errorCorrectionLevel: style.errorCorrection,
+      })
+      
+      const modules = qrData.modules
+      const moduleCount = modules.size
+      const cellSize = (canvas.width - style.margin * 2 * multiplier) / moduleCount
+      const offset = style.margin * multiplier
+      
+      ctx.fillStyle = style.bgColor
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      ctx.fillStyle = style.fgColor
+      
+      for (let row = 0; row < moduleCount; row++) {
+        for (let col = 0; col < moduleCount; col++) {
+          if (modules.get(row, col)) {
+            const x = offset + col * cellSize
+            const y = offset + row * cellSize
+            
+            if (style.dotStyle === "dots") {
+              ctx.beginPath()
+              ctx.arc(x + cellSize / 2, y + cellSize / 2, cellSize / 2 * 0.85, 0, Math.PI * 2)
+              ctx.fill()
+            } else if (style.dotStyle === "rounded") {
+              const radius = cellSize * 0.3
+              const size = cellSize * 0.9
+              const offsetAdjust = (cellSize - size) / 2
+              ctx.beginPath()
+              ctx.roundRect(x + offsetAdjust, y + offsetAdjust, size, size, radius)
+              ctx.fill()
+            }
+          }
+        }
+      }
+    }
+
+    // Add logo if provided
+    if (style.logo) {
+      const logoSize = (style.logoSize || 20) / 100
+      const logoWidth = canvas.width * logoSize
+      const logoHeight = canvas.height * logoSize
+      const logoX = (canvas.width - logoWidth) / 2
+      const logoY = (canvas.height - logoHeight) / 2
+
+      const padding = logoWidth * 0.15
+      ctx.fillStyle = style.bgColor
+      ctx.beginPath()
+      ctx.roundRect(logoX - padding, logoY - padding, logoWidth + padding * 2, logoHeight + padding * 2, 8 * multiplier)
+      ctx.fill()
+
+      const logoImg = new Image()
+      logoImg.crossOrigin = "anonymous"
+      logoImg.src = style.logo
+      
+      await new Promise<void>((resolve) => {
+        logoImg.onload = () => {
+          ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight)
+          resolve()
+        }
+        logoImg.onerror = () => resolve()
+      })
+    }
+  }
+
   const downloadQR = async (format: ExportFormat) => {
     if (!data) return
     
@@ -61,15 +142,9 @@ export function ExportPanel({ data, style }: ExportPanelProps) {
         filename += ".svg"
       } else {
         const canvas = document.createElement("canvas")
-        await QRCode.toCanvas(canvas, data, {
-          width: style.size * 2, // Higher resolution for export
-          margin: style.margin,
-          color: {
-            dark: style.fgColor,
-            light: style.bgColor,
-          },
-          errorCorrectionLevel: style.errorCorrection,
-        })
+        canvas.width = style.size * 2
+        canvas.height = style.size * 2
+        await generateCanvasWithLogo(canvas, 2)
 
         const mimeType = format === "png" ? "image/png" : format === "jpeg" ? "image/jpeg" : "image/webp"
         dataUrl = canvas.toDataURL(mimeType, 0.95)
@@ -98,15 +173,9 @@ export function ExportPanel({ data, style }: ExportPanelProps) {
 
     try {
       const canvas = document.createElement("canvas")
-      await QRCode.toCanvas(canvas, data, {
-        width: style.size * 2,
-        margin: style.margin,
-        color: {
-          dark: style.fgColor,
-          light: style.bgColor,
-        },
-        errorCorrectionLevel: style.errorCorrection,
-      })
+      canvas.width = style.size * 2
+      canvas.height = style.size * 2
+      await generateCanvasWithLogo(canvas, 2)
 
       canvas.toBlob(async (blob) => {
         if (blob) {
@@ -139,15 +208,9 @@ export function ExportPanel({ data, style }: ExportPanelProps) {
 
     try {
       const canvas = document.createElement("canvas")
-      await QRCode.toCanvas(canvas, data, {
-        width: style.size * 3,
-        margin: style.margin,
-        color: {
-          dark: style.fgColor,
-          light: style.bgColor,
-        },
-        errorCorrectionLevel: style.errorCorrection,
-      })
+      canvas.width = style.size * 3
+      canvas.height = style.size * 3
+      await generateCanvasWithLogo(canvas, 3)
 
       const printWindow = window.open("", "_blank")
       if (printWindow) {

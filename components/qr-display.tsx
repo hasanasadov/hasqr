@@ -25,7 +25,12 @@ export function QRDisplay({ data, style, className }: QRDisplayProps) {
       setError(null)
 
       try {
-        await QRCode.toCanvas(canvasRef.current, data, {
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return
+
+        // Generate base QR code
+        await QRCode.toCanvas(canvas, data, {
           width: style.size,
           margin: style.margin,
           color: {
@@ -34,6 +39,96 @@ export function QRDisplay({ data, style, className }: QRDisplayProps) {
           },
           errorCorrectionLevel: style.errorCorrection,
         })
+
+        // Apply dot style if not square
+        if (style.dotStyle && style.dotStyle !== "square") {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          const moduleSize = canvas.width / (Math.sqrt(imageData.data.length / 4))
+          
+          // Get the QR data to find module positions
+          const qrData = await QRCode.create(data, {
+            errorCorrectionLevel: style.errorCorrection,
+          })
+          
+          const modules = qrData.modules
+          const moduleCount = modules.size
+          const cellSize = (canvas.width - style.margin * 2 * (canvas.width / style.size)) / moduleCount
+          const offset = style.margin * (canvas.width / style.size)
+          
+          // Clear and redraw with custom dot style
+          ctx.fillStyle = style.bgColor
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          
+          ctx.fillStyle = style.fgColor
+          
+          for (let row = 0; row < moduleCount; row++) {
+            for (let col = 0; col < moduleCount; col++) {
+              if (modules.get(row, col)) {
+                const x = offset + col * cellSize
+                const y = offset + row * cellSize
+                
+                if (style.dotStyle === "dots") {
+                  // Draw circles
+                  ctx.beginPath()
+                  ctx.arc(
+                    x + cellSize / 2,
+                    y + cellSize / 2,
+                    cellSize / 2 * 0.85,
+                    0,
+                    Math.PI * 2
+                  )
+                  ctx.fill()
+                } else if (style.dotStyle === "rounded") {
+                  // Draw rounded rectangles
+                  const radius = cellSize * 0.3
+                  const size = cellSize * 0.9
+                  const offsetAdjust = (cellSize - size) / 2
+                  ctx.beginPath()
+                  ctx.roundRect(x + offsetAdjust, y + offsetAdjust, size, size, radius)
+                  ctx.fill()
+                }
+              }
+            }
+          }
+        }
+
+        // Add logo if provided
+        if (style.logo) {
+          const logoSize = (style.logoSize || 20) / 100
+          const logoWidth = canvas.width * logoSize
+          const logoHeight = canvas.height * logoSize
+          const logoX = (canvas.width - logoWidth) / 2
+          const logoY = (canvas.height - logoHeight) / 2
+
+          // Create white background for logo
+          const padding = logoWidth * 0.15
+          ctx.fillStyle = style.bgColor
+          ctx.beginPath()
+          ctx.roundRect(
+            logoX - padding,
+            logoY - padding,
+            logoWidth + padding * 2,
+            logoHeight + padding * 2,
+            8
+          )
+          ctx.fill()
+
+          // Load and draw logo
+          const logoImg = new Image()
+          logoImg.crossOrigin = "anonymous"
+          logoImg.src = style.logo
+          
+          await new Promise<void>((resolve, reject) => {
+            logoImg.onload = () => {
+              ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight)
+              resolve()
+            }
+            logoImg.onerror = () => {
+              console.error("[v0] Failed to load logo")
+              resolve() // Still resolve to show QR without logo
+            }
+          })
+        }
       } catch (err) {
         console.error("[v0] QR generation error:", err)
         setError("Failed to generate QR code")

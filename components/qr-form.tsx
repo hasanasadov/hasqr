@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-
 import { useState, useRef } from "react"
 import { type QRType } from "@/lib/qr-types"
 import { Input } from "@/components/ui/input"
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { Upload, X, FileIcon, ImageIcon, Video, Music, Loader2, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { LocationPicker } from "./location-picker"
 
 interface QRFormProps {
   type: QRType
@@ -133,7 +133,21 @@ export function QRForm({ type, formData, onFormChange }: QRFormProps) {
               {field.required && <span className="text-primary ml-1">*</span>}
             </Label>
 
-            {field.type === "file" ? (
+            {field.type === "location" ? (
+              <LocationPicker
+                latitude={formData.latitude || ""}
+                longitude={formData.longitude || ""}
+                locationName={formData.name || ""}
+                onLocationChange={(lat, lng, name) => {
+                  onFormChange({
+                    ...formData,
+                    latitude: lat,
+                    longitude: lng,
+                    name: name,
+                  })
+                }}
+              />
+            ) : field.type === "file" ? (
               <div className="space-y-3">
                 {!uploadedFile && !uploading && (
                   <div
