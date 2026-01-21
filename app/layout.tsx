@@ -1,24 +1,54 @@
-import { Toaster } from "sonner";
-import CustomLayout from "@/layouts/CustomLayout";
-import Navbar from "@/components/shared/Navbar";
-import "@/styles/globals.css";
-import Footer from "@/components/shared/Footer";
+import React from "react"
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+import { ThemeProvider } from '@/components/theme-provider'
+import './globals.css'
+
+const _geist = Geist({ subsets: ["latin"] });
+const _geistMono = Geist_Mono({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: 'Professional QR Code Generator',
+  description: 'Generate QR codes for social media, WiFi, contacts, locations, and more. Export in multiple formats with elite design.',
+  generator: 'hasanali',
+  icons: {
+    icon: [
+      {
+        url: '/icon-light-32x32.png',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/icon-dark-32x32.png',
+        media: '(prefers-color-scheme: dark)',
+      },
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    apple: '/apple-icon.png',
+  },
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="p-4 pt-1  min-h-screennm flex flex-col justify-between overflow-x-hidden ">
-        <CustomLayout>
-          <Navbar />
-          <Toaster richColors />
+      <body className={`font-sans antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
-          <Footer />
-        </CustomLayout>
+        </ThemeProvider>
+        <Analytics />
       </body>
     </html>
-  );
+  )
 }

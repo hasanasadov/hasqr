@@ -1,6 +1,6 @@
-export const cn = (...xs: Array<string | false | null | undefined>) =>
-  xs.filter(Boolean).join(" ");
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
-export const nowStr = () => new Date().toLocaleString();
-
-export const MAX_HISTORY = 10;
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
